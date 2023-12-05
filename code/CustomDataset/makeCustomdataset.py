@@ -59,18 +59,18 @@ def pkl_FlippingAug(input_dir_path, output_dir_path):
 
 if __name__ == '__main__':
     
-    jpg_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\0_gesture_jpg_dataset'
+    # jpg_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\0_gesture_jpg_dataset'
     pkl_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\1_gesture_pkl_dataset'
     frameAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\2_gesture_pkl_FrameAug'
     flipAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\3_gesture_pkl_FlipAug'
-    annos_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture.pkl'
+    annos_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_FrameAug30_FlipAug.pkl'
     
     ### json2pkl
-    json_to_pkl_files(jpg_dataset, pkl_dataset)
+    # json_to_pkl_files(jpg_dataset, pkl_dataset)
         
     ###Data augmentation
     pkl_FrameAug(pkl_dataset, frameAug_dataset, 30)
     pkl_FlippingAug(frameAug_dataset, flipAug_dataset)
             
     ###pkl2annotations
-    pkl2annotation(frameAug_dataset, annos_dataset)
+    pkl2annotation(flipAug_dataset, annos_dataset)

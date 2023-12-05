@@ -9,7 +9,7 @@ def flipping_Aug(input_path, output_path):
     
     for i in data["keypoint"]:
         for j in i:
-            print(j)
+            # print(j)
             for k in j:
                 k[0] = img_shape_2 - k[0]
     
