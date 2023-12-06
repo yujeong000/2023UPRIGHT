@@ -12,7 +12,7 @@ def flipping_Aug(input_path, output_path):
             # print(j)
             for k in j:
                 k[0] = img_shape_2 - k[0]
-    
+    data['frame_dir'] = data['frame_dir'] + "_flip"
     # Save the modified data to a pickle file
     with open(output_path, 'wb') as f:
         pickle.dump(data, f)

@@ -37,12 +37,18 @@ import pickle
 import numpy as np
 
 def frame_augment_data(data_path, output_path, fps):
-
+    #print(data_path)
     with open(data_path,"rb") as fr:
         data = pickle.load(fr)
-        
+    #print(data['duration'])
+    #print(data['total_frames'])  
+    #print(data['keypoint'].shape)
+    
     total_frame = int(data['duration']*fps)
     add_frame_num = round((total_frame - 10) // 9)
+    if add_frame_num <0:
+        add_frame_num = 0
+    #print(add_frame_num)
 
     # print('======================= Data Augmentation ===========================')
     frame_num = data['total_frames']
@@ -50,7 +56,7 @@ def frame_augment_data(data_path, output_path, fps):
 
     # print('==================== Keypoint =======================')
     annos_keypoint = np.array(data['keypoint'][0])
-
+    # print(data['keypoint'][0].shape)
     zero_array = np.zeros([keypoint_num,2])
     for i in range(len(annos_keypoint) - 1):
         for _ in range(add_frame_num):
@@ -66,6 +72,7 @@ def frame_augment_data(data_path, output_path, fps):
                 for j in range(add_frame_num):
                     index = j + 1
                     annos_keypoint[i*(add_frame_num + 1)+index][k][l] = annos_keypoint[i*(add_frame_num + 1)][k][l] + per_dist * index
+        
 
     data['keypoint'] = np.array([annos_keypoint])
     # print(data['keypoint'])
@@ -80,8 +87,12 @@ def frame_augment_data(data_path, output_path, fps):
 
     # print('==================== Total Frames =======================')
     data['total_frames'] = int(score_shape_2)
-    # print(data)
+    data['frame_dir'] = data['frame_dir'] + f"_frame{fps}"
+    # if data['duration'] > 1.0:
     
+    #     # print(data)
+    #print(data['total_frames'])
+    #print(data['keypoint'].shape)
     with open(output_path, 'wb') as f:
         pickle.dump(data, f)
                 
