@@ -7,11 +7,21 @@ def flipping_Aug(input_path, output_path):
     
     img_shape_2 = int(data["img_shape"][1])
     
+    idx_j=0
     for i in data["keypoint"]:
         for j in i:
-            # print(j)
-            for k in j:
-                k[0] = img_shape_2 - k[0]
+            j[[1,2]] = j[[2,1]]
+            j[[3,4]] = j[[4,3]]
+            j[[5,6]] = j[[6,5]]
+            j[[7,8]] = j[[8,7]]
+            j[[9,10]] = j[[10,9]]
+            j[[11,12]] = j[[12,11]]
+            j[[13,14]] = j[[14,13]]
+            j[[15,16]] = j[[16,15]]
+            
+            data["keypoint"][0][idx_j] = j
+            idx_j+=1
+            
     data['frame_dir'] = data['frame_dir'] + "_flip"
     # Save the modified data to a pickle file
     with open(output_path, 'wb') as f:

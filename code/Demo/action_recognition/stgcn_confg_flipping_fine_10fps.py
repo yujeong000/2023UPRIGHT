@@ -1,4 +1,4 @@
-_base_ =  '/content/mmaction2/configs/_base_/default_runtime.py'
+_base_ =  'default_runtime.py'
 
 model = dict(
     type='RecognizerGCN',
@@ -7,7 +7,7 @@ model = dict(
     cls_head=dict(type='GCNHead', num_classes=12, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = '/content/drive/MyDrive/1128_Dataset/1128_gesture_aug10.pkl'
+ann_file = '../../23_CapstoneDesign_Upright/ayoung_capstoneDesign/1205_dataset/gesture_Fine_flip_frameAug10.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
@@ -76,7 +76,7 @@ val_evaluator = [dict(type='AccMetric')]
 test_evaluator = val_evaluator
 
 train_cfg = dict(
-    type='EpochBasedTrainLoop', max_epochs=50, val_begin=1, val_interval=1)
+    type='EpochBasedTrainLoop', max_epochs=100, val_begin=1, val_interval=1)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 

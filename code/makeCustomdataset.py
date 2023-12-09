@@ -3,11 +3,13 @@ import shutil
 from tqdm import tqdm
 
 
-from Utils import get_files, get_last_directory_name, make_dir, get_subdirectories, remove_dir
-from FrameAugmentation import frame_augment_data
-from FlippingAugmentation import flipping_Aug
-from json2pkl import process_and_save_json
-from pkl2anno import pkl2annotation
+from Demo.Utils import get_files, get_last_directory_name, make_dir, get_subdirectories, remove_dir
+from CustomDataset.FrameAugmentation import frame_augment_data
+from CustomDataset.FlippingAugmentation import flipping_Aug
+from CustomDataset.FinetuningAugmentation import Finetunning_Aug
+from CustomDataset.json2pkl import process_and_save_json
+from CustomDataset.pkl2anno import pkl2annotation
+
 
 def json_to_pkl_files(input_dir_path, output_dir_path):
     #입력 데이터셋 폴더
@@ -56,6 +58,21 @@ def pkl_FlippingAug(input_dir_path, output_dir_path):
             output_path = rf'{result_subdirectory}/{get_last_directory_name(pkl_file)[:-4]}_flip.pkl'
             flipping_Aug(pkl_file, output_path)
             
+def pkl_FinetuningAug(input_dir_path, output_dir_path):
+    #입력 데이터셋 폴더
+    data_dir_list = get_subdirectories(input_dir_path)
+    #출력 데이터셋 폴더
+    make_dir(output_dir_path)
+    for data_dir in tqdm(data_dir_list, desc="Data augmentation: FinetuningAug"):
+        last_dir = get_last_directory_name(data_dir)
+        result_subdirectory = os.path.join(output_dir_path, last_dir)
+        make_dir(result_subdirectory)
+        
+        pkl_file_list = get_files(data_dir, '.pkl')
+        for pkl_file in pkl_file_list:
+            output_path = rf'{result_subdirectory}/{get_last_directory_name(pkl_file)[:-4]}_finetunning.pkl'
+            Finetunning_Aug(pkl_file, output_path)
+            
 def move_pkl_files(source_dir, target_dir):
 
     # source_dir 내의 모든 파일을 대상으로 반복
@@ -87,19 +104,42 @@ def merge_dir(source1_dir, source2_dir, output_dir_path):
         
 
 if __name__ == '__main__':
-    _fps = 30
+    _fps = 10
     
     jpg_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\0_gesture_jpg_dataset'
-    pkl_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\1_gesture_pkl_dataset'
+    pkl_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\0_gesture_pkl_dataset'
     remove_dir(pkl_dataset)
-    temp_flipAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\2_temp_gesture_pkl_Aug_flip'
+    ##1
+    temp_flipAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\1_temp_gesture_pkl_Aug_flip'
     remove_dir(temp_flipAug_dataset)
-    flipAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\2_gesture_pkl_Aug_flip'
+    flipAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\1_gesture_pkl_Aug_flip'
     remove_dir(flipAug_dataset)
+    
+    ##1
+    temp_fineAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\2_temp_gesture_pkl_Aug_fine'
+    remove_dir(temp_fineAug_dataset)
+    fineAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\2_gesture_pkl_Aug_fine'
+    remove_dir(fineAug_dataset)
+    
+    ##1
     frameAug_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\3_gesture_pkl_Aug_frame{_fps}'
     remove_dir(frameAug_dataset)
+    
+    ##2
     flip_frameAug_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\4_gesture_pkl_Aug_flip_frame{_fps}'
     remove_dir(flip_frameAug_dataset)
+    ##2
+    fine_frameAug_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\5_gesture_pkl_Aug_fine_frame{_fps}'
+    remove_dir(fine_frameAug_dataset)
+    ##2
+    temp_flip_fineAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\6_temp_gesture_pkl_Aug_flip_fine'
+    remove_dir(temp_flip_fineAug_dataset)
+    flip_fineAug_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\6_gesture_pkl_Aug_flip_fine'
+    remove_dir(flip_fineAug_dataset)
+    
+    ##3
+    fine_flip_frameAug_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\7_gesture_pkl_Aug_fine_flip_frame{_fps}'
+    remove_dir(fine_flip_frameAug_dataset)
     
     ## json2pkl
     json_to_pkl_files(jpg_dataset, pkl_dataset)
@@ -116,6 +156,19 @@ if __name__ == '__main__':
             
     ## pkl2annotations
     pkl2annotation(flipAug_dataset, annos_dataset)
+    
+    ###fineAug#####################################
+    print('###fineAug#####################################')
+    annos_dataset = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_FineAug.pkl'
+        
+    ## Frame augmentation
+    pkl_FinetuningAug(pkl_dataset, temp_fineAug_dataset)
+    
+    ## merge dir
+    merge_dir(pkl_dataset, temp_fineAug_dataset, fineAug_dataset) 
+            
+    ## pkl2annotations
+    pkl2annotation(fineAug_dataset, annos_dataset)
     
     ###frameAug#####################################
     print('###frameAug#####################################')
@@ -137,3 +190,36 @@ if __name__ == '__main__':
             
     ## pkl2annotations
     pkl2annotation(flip_frameAug_dataset, annos_dataset)
+    
+    ###frame + fineAug#####################################
+    print('###frame + fineAug#####################################')
+    annos_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_Fine_frameAug{_fps}.pkl'
+        
+    ## Frame augmentation
+    pkl_FrameAug(fineAug_dataset, fine_frameAug_dataset, _fps)
+            
+    ## pkl2annotations
+    pkl2annotation(fine_frameAug_dataset, annos_dataset)
+    
+    ###fineAug + flipAug#####################################
+    print('###fineAug + flipAug#####################################')
+    annos_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_Flip_fineAug.pkl'
+        
+    ## Frame augmentation
+    pkl_FinetuningAug(flipAug_dataset, temp_flip_fineAug_dataset)
+    
+    ## merge dir
+    merge_dir(flipAug_dataset, temp_flip_fineAug_dataset, flip_fineAug_dataset) 
+            
+    ## pkl2annotations
+    pkl2annotation(flip_fineAug_dataset, annos_dataset)
+    
+    ###frame + fine + flipAug#####################################
+    print('###frame + fine + flipAug#####################################')
+    annos_dataset = rf'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_Fine_flip_frameAug{_fps}.pkl'
+        
+    ## Frame augmentation
+    pkl_FrameAug(flip_fineAug_dataset, fine_flip_frameAug_dataset, _fps)
+            
+    ## pkl2annotations
+    pkl2annotation(fine_flip_frameAug_dataset, annos_dataset)

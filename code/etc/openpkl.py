@@ -5,7 +5,8 @@ import pickle
 data_path = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\1_gesture_pkl_dataset\A002\A00_S03_F_A_03_006_01_MO_B02_1.pkl'
 data_path = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_FrameAug10.pkl'
 data_path = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_FlipAug.pkl'
-data_path = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_Flip_frameAug30.pkl'
+data_path = r'F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\dataset\gesture_Flip_fineAug.pkl'
+
 with open(data_path,"rb") as fr:
     data = pickle.load(fr)
     
@@ -18,15 +19,15 @@ print(len(data['split']['train']))
 print(len(data['split']['val']))
 
 print(len(data['split']['test']))
-print(data['split']['test'])
+# print(data['split']['test'])
 
 print('======================= annotations ===========================')
 
 print(len(data['annotations']))
-num = 2001
+num = 3
 print(data['annotations'][num].keys())
 
-print(data['annotations'][num]['keypoint'].shape)
+print(data['annotations'][num]['keypoint'])
 
 print(data['annotations'][num]['keypoint_score'].shape)
 
