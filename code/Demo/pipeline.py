@@ -33,7 +33,8 @@ FONTCOLOR = (255, 255, 255)  # BGR, white
 THICKNESS = 1
 LINETYPE = 1
 
-BASEPATH = r'F:\2023_2\CapstoneProject\mmaction2\23_CapstoneDesign_UPRIGHT\code\Demo'
+BASEPATH = r'F:\2023_2\CapstoneProject\23_CapstoneDesign_UPRIGHT\code\Demo'
+
 
 def parse_args_default():
     parser = argparse.ArgumentParser(description='MMAction2 demo')
@@ -90,34 +91,6 @@ def parse_args(config, checkpoint, label_map):
     args = parser.parse_args()
     return args
 
-
-# def visualize(args, frames, data_samples, action_label):
-#     pose_config = mmengine.Config.fromfile(args.pose_config)
-#     visualizer = VISUALIZERS.build(pose_config.visualizer)
-#     visualizer.set_dataset_meta(data_samples[0].dataset_meta)
-
-#     vis_frames = []
-#     print('Drawing skeleton for each frame')
-#     for d, f in track_iter_progress(list(zip(data_samples, frames))):
-#         f = mmcv.imconvert(f, 'bgr', 'rgb')
-#         visualizer.add_datasample(
-#             'result',
-#             f,
-#             data_sample=d,
-#             draw_gt=False,
-#             draw_heatmap=False,
-#             draw_bbox=True,
-#             show=False,
-#             wait_time=0,
-#             out_file=None,
-#             kpt_thr=0.3)
-#         vis_frame = visualizer.get_image()
-#         cv2.putText(vis_frame, action_label, (10, 30), FONTFACE, FONTSCALE,
-#                     FONTCOLOR, THICKNESS, LINETYPE)
-#         vis_frames.append(vis_frame)
-
-#     vid = mpy.ImageSequenceClip(vis_frames, fps=24)
-#     vid.write_videofile(args.out_filename, remove_temp=True)
 
 def divide_into_batches(input_list, batch_size, overlap_range):
     batches = [input_list[i:i+batch_size] for i in range(0, len(input_list) -len(input_list)%(batch_size-overlap_range), batch_size-overlap_range)]
@@ -210,7 +183,7 @@ def actionRecognition(video_file_path):
 
 def demo(MP4_path):
     log = actionRecognition(MP4_path)
-    print(log)
+    return log
 
 if __name__ == '__main__':
     start_time = time.time()

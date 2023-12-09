@@ -4,8 +4,12 @@ from tkinter import filedialog, scrolledtext
 from tkVideoPlayer import TkinterVideo
 import datetime
 import tkinter.messagebox as msgbox
+import sys
 
 from pipeline import demo
+
+import pickle
+import time
 
 video_loaded = False  # Ensure the variable is global
 
@@ -14,10 +18,37 @@ def update_duration(event):
     duration = vid_player.video_info()["duration"]
     end_time["text"] = str(datetime.timedelta(seconds=duration))
     progress_slider["to"] = duration
-    
+
 # 프로그레스 슬라이더 업데이트 함수
 def update_scale(event):
     progress_value.set(vid_player.current_duration())
+
+datas = []
+
+def parsing_log(log):
+    time.sleep(1)
+    # 영상전체 프레임 추출
+    global total_frame
+    total_frame = log[0]['total_frame']
+    video_duration = vid_player.video_info()["duration"]
+    
+    # parsing 행동, 프레임  
+    for i in log:
+        tmp = []
+        tmp.append(i['action_label'])
+        
+        frame = i['frame']
+        sec = frame2second(frame, video_duration)
+        min_sec = seconds_to_minutes_and_seconds(sec)
+        tmp.append(min_sec)
+        
+        datas.append(tmp)
+    
+def frame2second(frame, video_duration):
+    framePerSecond = total_frame / video_duration
+
+    return round(frame / framePerSecond)
+
 
 # 동영상 로딩 함수
 def load_video():
@@ -31,7 +62,15 @@ def load_video():
         video_loaded = True  # Update the video loading status
         progress_value.set(0)
         play_pause()
-        demo(file_path)
+        log = demo(file_path)
+        # with open(file='log.pickle', mode='wb') as f:
+        #     pickle.dump(log, f)
+        # with open(file='log.pickle', mode='rb') as f:
+        #     log=pickle.load(f)
+            
+        parsing_log(log)
+        addButton(right_frame)
+
         
 # 동영상 시간으로 이동 함수
 def seek(value):
@@ -63,6 +102,11 @@ def video_ended(event):
     play_pause_btn["text"] = "Play"
     progress_slider.set(0)
 
+# 150초가 들어올 때 2:30 과 같은 형식으로 변환
+def seconds_to_minutes_and_seconds(seconds):
+    minutes, seconds = divmod(seconds, 60)
+    return f"{minutes:01d}:{seconds:02d}"
+
 # 2:30 과 같은 형식으로 분과 초가 들어올때 초로 변환
 def time_to_seconds(time_str):
     try:
@@ -83,6 +127,26 @@ def frame(d, x, y, p, bgc):
     fr.pack(side=p, fill='both', padx=5, pady=5, expand=True)
     return fr
 
+def addButton(right_frame):
+    # 특정 시간으로 이동하는 버튼들
+    time_buttons = []
+    for data in datas:
+        btn = tk.Button(right_frame, text=f"%-20s: {data[1]}" % data[0], command=lambda s=data[1]: load_video_at_time(s), width=60, height=2)
+        btn.pack(side="top")
+        time_buttons.append(btn)
+
+
+class ConsoleRedirector:
+    def __init__(self, console):
+        self.console = console
+
+    def write(self, message):
+        self.console.insert(tk.END, message)
+        self.console.see(tk.END)  # 스크롤하여 가장 최근의 내용을 보여줌
+
+    def flush(self):
+        pass
+
 if __name__ == '__main__':
     root = Tk()
     root.title("URIGHT Demo.")
@@ -96,12 +160,9 @@ if __name__ == '__main__':
     Label(left_frame, text="Presentation VIDEO", font="Arial", foreground="white", background='grey10').pack(side='top', padx=5, pady=7)
     Label(right_frame, text="VIDEO TIME TABLE", font="Arial", foreground="white", background='grey17').pack(side='top', padx=5, pady=7)
     
-    # Text 위젯 생성 (콘솔 역할을 하는 부분)
-    console_text = scrolledtext.ScrolledText(right_frame, wrap=tk.WORD, width=40, height=10)
-    console_text.pack(expand=True, fill='both')
-
+    
     # 이미지 로드
-    logo_image = tk.PhotoImage(file=r"23_CapstoneDesign_UPRIGHT\code\Demo\resorce\Upright_logo.png")
+    logo_image = tk.PhotoImage(file=r"code\Demo\resorce\Upright_logo.png")
 
     # 이미지를 표시할 프레임 생성
     img_frame = Frame(left_frame, height=200)
@@ -139,26 +200,9 @@ if __name__ == '__main__':
     end_time = tk.Label(left_frame, text=str(datetime.timedelta(seconds=0)))
     end_time.pack(side="left", fill="y")
 
-    file_path = r"F:\2023_2\CapstoneProject\mmaction2\23_Capstone_Dataset\gesture.mp4"
-
-    # demo
-    demo_btn = tk.Button(left_frame, text="Action Recog.", command=lambda: demo(file_path))
-    demo_btn.pack(side="left", fill="y")
-
     # 이벤트 바인딩
     vid_player.bind("<<Duration>>", update_duration)
     vid_player.bind("<<SecondChanged>>", update_scale)
     vid_player.bind("<<Ended>>", video_ended)
-
-    datas = [["까딱까딱", "2:30"],
-            ["흔들흔들", "3:00"],
-            ["인사", "4:00"]]
-
-    # 특정 시간으로 이동하는 버튼들
-    time_buttons = []
-    for data in datas:
-        btn = tk.Button(right_frame, text=f"%-20s: {data[1]}" % data[0], command=lambda s=data[1]: load_video_at_time(s), width=60, height=2)
-        btn.pack(side="top")
-        time_buttons.append(btn)
 
     root.mainloop()
