@@ -23,6 +23,20 @@ def update_duration(event):
 def update_scale(event):
     progress_value.set(vid_player.current_duration())
 
+
+merge_datas = []
+def mergedatas():
+    pre_text, pre_time = datas[0]
+    for i in range(len(datas)):
+        cur_text, cur_time = datas[i]
+        
+        if(pre_text != cur_text):
+            merge_datas.append([pre_text, pre_time + " - " + datas[i-1][1]])
+            pre_text, pre_time = datas[i]
+
+    merge_datas.append([pre_text, pre_time + " - " + cur_time])
+
+
 datas = []
 
 def parsing_log(log):
@@ -43,6 +57,8 @@ def parsing_log(log):
         tmp.append(min_sec)
         
         datas.append(tmp)
+        
+    mergedatas()
     
 def frame2second(frame, video_duration):
     framePerSecond = total_frame / video_duration
@@ -62,11 +78,11 @@ def load_video():
         video_loaded = True  # Update the video loading status
         progress_value.set(0)
         play_pause()
-        log = demo(file_path)
+        # log = demo(file_path)
         # with open(file='log.pickle', mode='wb') as f:
         #     pickle.dump(log, f)
-        # with open(file='log.pickle', mode='rb') as f:
-        #     log=pickle.load(f)
+        with open(file='log.pickle', mode='rb') as f:
+            log=pickle.load(f)
             
         parsing_log(log)
         addButton(right_frame)
@@ -107,9 +123,10 @@ def seconds_to_minutes_and_seconds(seconds):
     minutes, seconds = divmod(seconds, 60)
     return f"{minutes:01d}:{seconds:02d}"
 
-# 2:30 과 같은 형식으로 분과 초가 들어올때 초로 변환
+# 2:30 - 2:45 과 같은 형식으로 분과 초가 들어올때 초로 변환
 def time_to_seconds(time_str):
     try:
+        time_str = time_str.split(" ")[0]
         minutes, seconds = map(int, time_str.split(":"))
         total_seconds = minutes * 60 + seconds
         return total_seconds
@@ -130,7 +147,7 @@ def frame(d, x, y, p, bgc):
 def addButton(right_frame):
     # 특정 시간으로 이동하는 버튼들
     time_buttons = []
-    for data in datas:
+    for data in merge_datas:
         btn = tk.Button(right_frame, text=f"%-20s: {data[1]}" % data[0], command=lambda s=data[1]: load_video_at_time(s), width=60, height=2)
         btn.pack(side="top")
         time_buttons.append(btn)
@@ -179,26 +196,29 @@ if __name__ == '__main__':
     vid_player = TkinterVideo(scaled=True, master=imglabel)
     vid_player.pack(expand=True)
 
+    tool_frame = Frame(left_frame,background="black")
+    tool_frame.pack(side="top",fill="both")
+
     # 재생/일시정지 버튼
-    play_pause_btn = tk.Button(left_frame, text="Play", command=play_pause)
+    play_pause_btn = tk.Button(tool_frame, text="PLAY",font="Fixedsys",background="white", command=play_pause)
     play_pause_btn.pack(side="left", fill="y")
 
     # 동영상 로딩 버튼
-    load_btn = tk.Button(left_frame, text="Load Video", command=load_video)
+    load_btn = tk.Button(tool_frame, text="Load Video",font="Fixedsys",background="white", command=load_video)
     load_btn.pack(side="left", fill="y")
 
     # 프로그레스 슬라이더
-    progress_value = tk.IntVar(left_frame)
-    progress_slider = tk.Scale(left_frame, variable=progress_value, from_=0, to=0, orient="horizontal", command=seek)
+    progress_value = tk.IntVar(tool_frame)
+    progress_slider = tk.Scale(tool_frame, variable=progress_value, from_=0, to=0, orient="horizontal", command=seek)
     progress_slider.pack(side="left", fill="both", expand=True)
 
     # 현재 재생 시간 표시 레이블
-    start_time = Label(left_frame, text=str(datetime.timedelta(seconds=0)))
-    start_time.pack(side="left", fill="y")
+    start_time = Label(tool_frame, text="",font="system")
+    start_time.pack(fill="both", expand=True)
 
     # 총 재생 시간 표시 레이블
-    end_time = tk.Label(left_frame, text=str(datetime.timedelta(seconds=0)))
-    end_time.pack(side="left", fill="y")
+    end_time = tk.Label(tool_frame, text=str(datetime.timedelta(seconds=0)), font="system")
+    end_time.pack(fill="both",expand=True)
 
     # 이벤트 바인딩
     vid_player.bind("<<Duration>>", update_duration)
